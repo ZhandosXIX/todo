@@ -8,6 +8,8 @@
 import UIKit
 
 class TableViewController: UITableViewController {
+    
+    var arrayTask: [Taskitem] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -17,29 +19,76 @@ class TableViewController: UITableViewController {
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
+        
+      
+    }
+    override func viewWillAppear(_ animated: Bool) {
+        let defaults = UserDefaults.standard
+        
+        do {
+            if let data = defaults.data(forKey: "taskitemArray") {
+                let array = try JSONDecoder().decode([Taskitem].self, from: data)
+                
+                arrayTask = array
+            }
+            
+        }catch {
+            print("unable to encode\(error)")
+        }
+        
+
+        tableView.reloadData()
+    }
+    func saveTasks() {
+        let defaults = UserDefaults.standard
+        
+        do {
+    
+                let encodedata = try JSONEncoder().encode(arrayTask)
+                
+                defaults.set(encodedata, forKey: "taskitemArray")
+            
+            
+        } catch {
+            print("unable to encode\(error)")
+        }
+        
     }
 
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
-        return 0
+        return 1
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return 0
+        return arrayTask.count
     }
 
-    /*
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
+        let cell = UITableViewCell.init(style: .default, reuseIdentifier: "cell")
 
-        // Configure the cell...
+        cell.textLabel?.text = arrayTask[indexPath.row].name
+         
+        if arrayTask[indexPath.row].isComplete{
+            cell.accessoryType = .checkmark
+        }else{
+            cell.accessoryType = .none
 
+        }
+        
         return cell
     }
-    */
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        arrayTask[indexPath.row].isComplete.toggle()
+        
+        tableView.reloadData()
+        saveTasks()
+    }
 
     /*
     // Override to support conditional editing of the table view.
@@ -49,17 +98,18 @@ class TableViewController: UITableViewController {
     }
     */
 
-    /*
+    
     // Override to support editing the table view.
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            // Delete the row from the data source
+            arrayTask.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
+            saveTasks()
         } else if editingStyle == .insert {
             // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
         }    
     }
-    */
+    
 
     /*
     // Override to support rearranging the table view.

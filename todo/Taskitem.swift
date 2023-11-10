@@ -6,3 +6,7 @@
 //
 
 import Foundation
+struct Taskitem: Codable {
+    var name = ""
+    var isComplete = false
+}
